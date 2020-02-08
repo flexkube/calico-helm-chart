@@ -100,6 +100,14 @@ rules:
       - get
       - create
       - update
+  # Allow using PSP
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - use
+    resourceNames:
+      - calico-kube-controllers
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -246,6 +254,14 @@ rules:
       - daemonsets
     verbs:
       - get
+  # Allow using PSP
+  - apiGroups: ["policy"]
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - use
+    resourceNames:
+      - calico-node
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
