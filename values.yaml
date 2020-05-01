@@ -1,3 +1,12 @@
-podCIDR: "192.168.0.0/16"
+## When podCIDR is not defined or it's empty string (""), calico will try to:
+## a. autodetect it from kubeadm configmaps (if cluster was installed with kubeadm)
+## (check if it found it in the calico-node pod. e.g. kubectl -n kube-system logs -f calico-node-v56w9 | grep 'kubeadm config map' )
+## b. use "192.168.0.0/16"
+## More info at: https://docs.projectcalico.org/getting-started/kubernetes/self-managed-onprem/onpremises#install-calico-with-kubernetes-api-datastore-50-nodes-or-less
+## and: https://github.com/projectcalico/calico/issues/717
+## If you are not sure, find it like this: `grep cluster-cidr /etc/kubernetes/manifests/kube-controller-manager.yaml | cut -d"=" -f2`
+## PS: if you had flannel before, your clusters will have "10.244.0.0/16" 
+
+#podCIDR: "192.168.0.0/16"
 typha: false
 flexVolumePluginDir: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec"
