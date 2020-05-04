@@ -576,7 +576,7 @@ spec:
                 configMapKeyRef:
                   name: calico-config
                   key: veth_mtu
-            {{ if .Values.podCIDR }}
+            {{- if .Values.podCIDR }}
             # The default IPv4 pool to create on startup if none exists. Pod IPs will be
             # chosen from this range. Changing this value after installation will have
             # no effect. This should fall within `--cluster-cidr`.
@@ -751,4 +751,3 @@ metadata:
 
 ---
 # Source: calico/templates/configure-canal.yaml
-
