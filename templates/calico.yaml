@@ -582,7 +582,7 @@ spec:
             # no effect. This should fall within `--cluster-cidr`.
             - name: CALICO_IPV4POOL_CIDR
               value: "{{ .Values.podCIDR }}"
-            {{ end }}
+            {{- end }}
             # Disable file logging so `kubectl logs` works.
             - name: CALICO_DISABLE_FILE_LOGGING
               value: "true"
@@ -751,5 +751,4 @@ metadata:
 
 ---
 # Source: calico/templates/configure-canal.yaml
-
 
