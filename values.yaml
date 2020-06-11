@@ -10,3 +10,4 @@
 #podCIDR: "192.168.0.0/16"
 typha: false
 flexVolumePluginDir: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec"
+vethMtu: 1440
