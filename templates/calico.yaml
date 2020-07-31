@@ -766,6 +766,10 @@ spec:
               value: node
             - name: DATASTORE_TYPE
               value: kubernetes
+            {{- if .Values.autoHostEndpoints }}
+            - name: AUTO_HOST_ENDPOINTS
+              value: enabled
+            {{- end }}
           readinessProbe:
             exec:
               command:

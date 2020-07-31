@@ -11,3 +11,4 @@
 typha: false
 flexVolumePluginDir: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec"
 vethMtu: 1440
+autoHostEndpoints: false
