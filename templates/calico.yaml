@@ -16,12 +16,14 @@ data:
   {{- end }}
   # Configure the backend to use.
   calico_backend: "bird"
-  # Configure the MTU to use for workload interfaces and the
-  # tunnels.  For IPIP, set to your network MTU - 20; for VXLAN
-  # set to your network MTU - 50.
+  # Configure the MTU to use for workload interfaces and tunnels.
+  # - If Wireguard is enabled, set to your network MTU - 60
+  # - Otherwise, if VXLAN or BPF mode is enabled, set to your network MTU - 50
+  # - Otherwise, if IPIP is enabled, set to your network MTU - 20
+  # - Otherwise, if not using any encapsulation, set to your network MTU.
   veth_mtu: "{{ .Values.vethMtu }}"
 
-  # The CNI network configuration to install on each node.  The special
+  # The CNI network configuration to install on each node. The special
   # values in this config will be automatically populated.
   cni_network_config: |-
     {
@@ -150,6 +152,9 @@ subjects:
   name: calico-kube-controllers
   namespace: kube-system
 ---
+
+---
+# Source: calico/templates/calico-node-rbac.yaml
 # Include a clusterrole for the calico-node DaemonSet,
 # and bind it to the calico-node serviceaccount.
 kind: ClusterRole
@@ -249,7 +254,7 @@ rules:
       - get
       - list
       - watch
-  # These permissions are only requried for upgrade from v2.6, and can
+  # These permissions are only required for upgrade from v2.6, and can
   # be removed after upgrade or on fresh installations.
   - apiGroups: ["crd.projectcalico.org"]
     resources:
@@ -345,11 +350,11 @@ metadata:
   labels:
     k8s-app: calico-typha
 spec:
-  # Number of Typha replicas.  To enable Typha, set this to a non-zero value *and* set the
+  # Number of Typha replicas. To enable Typha, set this to a non-zero value *and* set the
   # typha_service_name variable in the calico-config ConfigMap above.
   #
-  # We recommend using Typha if you have more than 50 nodes.  Above 100 nodes it is essential
-  # (when using the Kubernetes datastore).  Use one replica for every 100-200 nodes.  In
+  # We recommend using Typha if you have more than 50 nodes. Above 100 nodes it is essential
+  # (when using the Kubernetes datastore). Use one replica for every 100-200 nodes. In
   # production, we recommend running at least 3 replicas to reduce the impact of rolling upgrade.
   replicas: 1
   revisionHistoryLimit: 2
@@ -361,27 +366,20 @@ spec:
       labels:
         k8s-app: calico-typha
       annotations:
-        # This, along with the CriticalAddonsOnly toleration below, marks the pod as a critical
-        # add-on, ensuring it gets priority scheduling and that its resources are reserved
-        # if it ever gets evicted.
-        scheduler.alpha.kubernetes.io/critical-pod: ''
         cluster-autoscaler.kubernetes.io/safe-to-evict: 'true'
     spec:
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        kubernetes.io/os: linux
       hostNetwork: true
       tolerations:
         # Mark the pod as a critical add-on for rescheduling.
         - key: CriticalAddonsOnly
           operator: Exists
-        - key: node-role.kubernetes.io/master
-          operator: Exists
-          effect: NoSchedule
       # Since Calico can't network a pod until Typha is up, we need to run Typha itself
       # as a host-networked pod.
       serviceAccountName: calico-node
       priorityClassName: system-cluster-critical
-      # fsGroup allows using projected serviceaccount tokens as described here kubernetes/kubernetes#82573 
+      # fsGroup allows using projected serviceaccount tokens as described here kubernetes/kubernetes#82573
       securityContext:
         fsGroup: 65534
       containers:
@@ -392,7 +390,7 @@ spec:
           name: calico-typha
           protocol: TCP
         env:
-          # Enable "info" logging by default.  Can be set to "debug" to increase verbosity.
+          # Enable "info" logging by default. Can be set to "debug" to increase verbosity.
           - name: TYPHA_LOGSEVERITYSCREEN
             value: "info"
           # Disable logging to file and syslog since those don't make sense in Kubernetes.
@@ -408,7 +406,7 @@ spec:
             value: "kubernetes"
           - name: TYPHA_HEALTHENABLED
             value: "true"
-          # Uncomment these lines to enable prometheus metrics.  Since Typha is host-networked,
+          # Uncomment these lines to enable prometheus metrics. Since Typha is host-networked,
           # this opens a port on the host, which may need to be secured.
           #- name: TYPHA_PROMETHEUSMETRICSENABLED
           #  value: "true"
@@ -472,12 +470,6 @@ spec:
     metadata:
       labels:
         k8s-app: calico-node
-      annotations:
-        # This, along with the CriticalAddonsOnly toleration below,
-        # marks the pod as a critical add-on, ensuring it gets
-        # priority scheduling and that its resources are reserved
-        # if it ever gets evicted.
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       nodeSelector:
         kubernetes.io/os: linux
@@ -604,6 +596,9 @@ spec:
             # Enable IPIP
             - name: CALICO_IPV4POOL_IPIP
               value: "Always"
+            # Enable or Disable VXLAN on the default IP pool.
+            - name: CALICO_IPV4POOL_VXLAN
+              value: "Never"
             # Set MTU for tunnel device used if ipip is enabled
             - name: FELIX_IPINIPMTU
               valueFrom:
@@ -612,6 +607,12 @@ spec:
                   key: veth_mtu
             # Set MTU for the VXLAN tunnel device.
             - name: FELIX_VXLANMTU
+              valueFrom:
+                configMapKeyRef:
+                  name: calico-config
+                  key: veth_mtu
+            # Set MTU for the Wireguard tunnel device.
+            - name: FELIX_WIREGUARDMTU
               valueFrom:
                 configMapKeyRef:
                   name: calico-config
@@ -744,8 +745,6 @@ spec:
       namespace: kube-system
       labels:
         k8s-app: calico-kube-controllers
-      annotations:
-        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
       nodeSelector:
         kubernetes.io/os: linux
