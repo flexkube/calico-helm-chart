@@ -74,3 +74,4 @@ spec:
   - pathPrefix: "/var/lib/cni/networks"
   - pathPrefix: "/var/run/nodeagent"
   - pathPrefix: "{{ .Values.flexVolumePluginDir }}/nodeagent~uds"
+  - pathPrefix: "/sys/fs"
