@@ -409,8 +409,8 @@ spec:
             value: "true"
           # Uncomment these lines to enable prometheus metrics. Since Typha is host-networked,
           # this opens a port on the host, which may need to be secured.
-          #- name: TYPHA_PROMETHEUSMETRICSENABLED
-          #  value: "true"
+          - name: TYPHA_PROMETHEUSMETRICSENABLED
+            value: "true"
           #- name: TYPHA_PROMETHEUSMETRICSPORT
           #  value: "9093"
         livenessProbe:
@@ -429,6 +429,9 @@ spec:
             port: 9098
             host: localhost
           periodSeconds: 10
+        ports:
+        - containerPort: 9091
+          name: metrics
 
 ---
 
@@ -654,6 +657,15 @@ spec:
               value: "info"
             - name: FELIX_HEALTHENABLED
               value: "true"
+            - name: FELIX_PROMETHEUSMETRICSENABLED
+              value: "true"
+            - name: FELIX_PROMETHEUSMETRICSHOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+          ports:
+          - containerPort: 9091
+            name: metrics
           securityContext:
             privileged: true
           resources:

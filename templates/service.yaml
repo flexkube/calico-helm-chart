@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: calico-node
+  labels:
+    k8s-app: calico-node
+spec:
+  selector:
+    k8s-app: calico-node
+  ports:
+  - port: 9091
+    targetPort: 9091
+    name: metrics
+{{- if .Values.typha }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: calico-typha
+  labels:
+    k8s-app: calico-typha
+spec:
+  selector:
+    k8s-app: calico-typha
+  ports:
+  - port: 9091
+    targetPort: 9091
+    name: metrics
+{{- end }}
