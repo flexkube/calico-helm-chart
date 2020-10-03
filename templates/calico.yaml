@@ -670,8 +670,10 @@ spec:
             privileged: true
           resources:
             requests:
-              cpu: 250m
-              memory: 30Mi
+              cpu: 40m
+              memory: 140Mi
+            limits:
+              memory: 500Mi
           livenessProbe:
             exec:
               command:
@@ -815,7 +817,10 @@ spec:
               - -r
           resources:
             requests:
-              memory: 20Mi
+              cpu: 25m
+              memory: 30Mi
+            limits:
+              memory: 50Mi
 
 ---
 
