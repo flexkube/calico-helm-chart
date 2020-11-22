@@ -7,7 +7,7 @@ metadata:
   name: calico-config
   namespace: kube-system
 data:
-  {{- if .Values.typha }}
+  {{- if .Values.typha.enabled }}
   # You must set a non-zero value for Typha replicas below.
   typha_service_name: "calico-typha"
   {{- else }}
@@ -318,7 +318,7 @@ subjects:
   namespace: kube-system
 
 ---
-{{ if .Values.typha }}
+{{ if .Values.typha.enabled }}
 # Source: calico/templates/calico-typha.yaml
 # This manifest creates a Service, which will be backed by Calico's Typha daemon.
 # Typha sits in between Felix and the API server, reducing Calico's load on the API server.
@@ -390,6 +390,8 @@ spec:
         - containerPort: 5473
           name: calico-typha
           protocol: TCP
+        - containerPort: 9091
+          name: metrics
         env:
           # Enable "info" logging by default. Can be set to "debug" to increase verbosity.
           - name: TYPHA_LOGSEVERITYSCREEN
@@ -413,6 +415,10 @@ spec:
             value: "true"
           #- name: TYPHA_PROMETHEUSMETRICSPORT
           #  value: "9093"
+          {{- range $key, $value := .Values.typha.env }}
+          - name: {{ $key | quote }}
+            value: {{ $value | quote }}
+          {{- end }}
         livenessProbe:
           httpGet:
             path: /liveness
@@ -429,9 +435,6 @@ spec:
             port: 9098
             host: localhost
           periodSeconds: 10
-        ports:
-        - containerPort: 9091
-          name: metrics
 
 ---
 
@@ -663,6 +666,10 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.hostIP
+            {{- range $key, $value := .Values.node.env }}
+            - name: {{ $key | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
           ports:
           - containerPort: 9091
             name: metrics
