@@ -16,11 +16,10 @@ data:
   {{- end }}
   # Configure the backend to use.
   calico_backend: "bird"
+
   # Configure the MTU to use for workload interfaces and tunnels.
-  # - If Wireguard is enabled, set to your network MTU - 60
-  # - Otherwise, if VXLAN or BPF mode is enabled, set to your network MTU - 50
-  # - Otherwise, if IPIP is enabled, set to your network MTU - 20
-  # - Otherwise, if not using any encapsulation, set to your network MTU.
+  # By default, MTU is auto-detected, and explicitly setting this field should not be required.
+  # You can override auto-detection by providing a non-zero value.
   veth_mtu: "{{ .Values.vethMtu }}"
 
   # The CNI network configuration to install on each node. The special
@@ -384,7 +383,7 @@ spec:
       securityContext:
         fsGroup: 65534
       containers:
-      - image: calico/typha:v{{ .Chart.AppVersion }}
+      - image: docker.io/calico/typha:v{{ .Chart.AppVersion }}
         name: calico-typha
         ports:
         - containerPort: 5473
@@ -392,6 +391,11 @@ spec:
           protocol: TCP
         - containerPort: 9091
           name: metrics
+        envFrom:
+        - configMapRef:
+            # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
+            name: kubernetes-services-endpoint
+            optional: true
         env:
           # Enable "info" logging by default. Can be set to "debug" to increase verbosity.
           - name: TYPHA_LOGSEVERITYSCREEN
@@ -500,7 +504,7 @@ spec:
         # It can be deleted if this is a fresh installation, or if you have already
         # upgraded to use calico-ipam.
         - name: upgrade-ipam
-          image: calico/cni:v{{ .Chart.AppVersion }}
+          image: docker.io/calico/cni:v{{ .Chart.AppVersion }}
           command: ["/opt/cni/bin/calico-ipam", "-upgrade"]
           envFrom:
           - configMapRef:
@@ -527,7 +531,7 @@ spec:
         # This container installs the CNI binaries
         # and CNI network config file on each node.
         - name: install-cni
-          image: calico/cni:v{{ .Chart.AppVersion }}
+          image: docker.io/calico/cni:v{{ .Chart.AppVersion }}
           command: ["/opt/cni/bin/install"]
           envFrom:
           - configMapRef:
@@ -568,7 +572,7 @@ spec:
         # Adds a Flex Volume Driver that creates a per-pod Unix Domain Socket to allow Dikastes
         # to communicate with Felix over the Policy Sync API.
         - name: flexvol-driver
-          image: calico/pod2daemon-flexvol:v{{ .Chart.AppVersion }}
+          image: docker.io/calico/pod2daemon-flexvol:v{{ .Chart.AppVersion }}
           volumeMounts:
           - name: flexvol-driver-host
             mountPath: /host/driver
@@ -579,7 +583,7 @@ spec:
         # container programs network policy and routes on each
         # host.
         - name: calico-node
-          image: calico/node:v{{ .Chart.AppVersion }}
+          image: docker.io/calico/node:v{{ .Chart.AppVersion }}
           envFrom:
           - configMapRef:
               # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
@@ -719,6 +723,9 @@ spec:
               # Bidirectional means that, if we mount the BPF filesystem at /sys/fs/bpf it will propagate to the host.
               # If the host is known to mount that filesystem already then Bidirectional can be omitted.
               mountPropagation: Bidirectional
+            - name: cni-log-dir
+              mountPath: /var/log/calico/cni
+              readOnly: true
       volumes:
         # Used by calico-node.
         - name: lib-modules
@@ -745,6 +752,10 @@ spec:
         - name: cni-net-dir
           hostPath:
             path: /etc/cni/net.d
+        # Used to access CNI logs.
+        - name: cni-log-dir
+          hostPath:
+            path: /var/log/calico/cni
         # Mount in the directory for host-local IPAM allocations. This is
         # used when upgrading from host-local to calico-ipam, and can be removed
         # if not using the upgrade-ipam init container.
@@ -806,7 +817,7 @@ spec:
       priorityClassName: system-cluster-critical
       containers:
         - name: calico-kube-controllers
-          image: calico/kube-controllers:v{{ .Chart.AppVersion }}
+          image: docker.io/calico/kube-controllers:v{{ .Chart.AppVersion }}
           env:
             # Choose which controllers to run.
             - name: ENABLED_CONTROLLERS
@@ -836,6 +847,23 @@ kind: ServiceAccount
 metadata:
   name: calico-kube-controllers
   namespace: kube-system
+
+---
+
+# This manifest creates a Pod Disruption Budget for Controller to allow K8s Cluster Autoscaler to evict
+
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: calico-kube-controllers
+  namespace: kube-system
+  labels:
+    k8s-app: calico-kube-controllers
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      k8s-app: calico-kube-controllers
 
 ---
 # Source: calico/templates/calico-etcd-secrets.yaml
