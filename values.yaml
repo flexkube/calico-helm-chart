@@ -15,14 +15,14 @@ autoHostEndpoints: false
 
 typha:
   image:
-    repository: "docker.io"
+    registry: "docker.io"
   enabled: false
   env:
     # TYPHA_PROMETHEUSMETRICSPORT: "9093"
 
 node:
   image:
-    repository: "docker.io"
+    registry: "docker.io"
   env:
     # Disable sourceDestCheck on AWS
     # https://docs.projectcalico.org/reference/resources/felixconfig#aws-iam-rolepolicy-for-source-destination-check-configuration
