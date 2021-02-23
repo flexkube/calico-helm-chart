@@ -99,6 +99,7 @@ rules:
       - create
       - update
       - delete
+      - watch
   # kube-controllers manages hostendpoints.
   - apiGroups: ["crd.projectcalico.org"]
     resources:
@@ -867,9 +868,6 @@ spec:
 
 ---
 # Source: calico/templates/calico-etcd-secrets.yaml
-
----
-# Source: calico/templates/calico-typha.yaml
 
 ---
 # Source: calico/templates/configure-canal.yaml
