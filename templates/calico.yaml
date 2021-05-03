@@ -59,7 +59,8 @@ data:
       ]
     }
 ---
-# Source: calico/templates/rbac.yaml
+---
+# Source: calico/templates/calico-kube-controllers-rbac.yaml
 
 # Include a clusterrole for the kube-controllers component,
 # and bind it to the calico-kube-controllers serviceaccount.
@@ -829,11 +830,20 @@ spec:
             - name: AUTO_HOST_ENDPOINTS
               value: enabled
             {{- end }}
+          livenessProbe:
+            exec:
+              command:
+              - /usr/bin/check-status
+              - -l
+            periodSeconds: 10
+            initialDelaySeconds: 10
+            failureThreshold: 6
           readinessProbe:
             exec:
               command:
               - /usr/bin/check-status
               - -r
+            periodSeconds: 10
           resources:
             requests:
               cpu: 25m
