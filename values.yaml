@@ -7,22 +7,24 @@
 ## If you are not sure, find it like this: `grep cluster-cidr /etc/kubernetes/manifests/kube-controller-manager.yaml | cut -d"=" -f2`
 ## PS: if you had flannel before, your clusters will have "10.244.0.0/16"
 
-podCIDR: ""
-#podCIDR: "192.168.0.0/16"
+podCIDR: "10.42.0.0/16"
+podIP4BlockSize: 24
+podCIDR6: "fd42::/48"
+podIP6BlockSize: 118
 flexVolumePluginDir: "/usr/libexec/kubernetes/kubelet-plugins/volume/exec"
 vethMtu: 0
 autoHostEndpoints: false
 
 typha:
   image:
-    registry: "docker.io"
+    registry: "docker.io/rancher"
   enabled: false
   env:
     # TYPHA_PROMETHEUSMETRICSPORT: "9093"
 
 node:
   image:
-    registry: "docker.io"
+    registry: "docker.io/rancher"
   env:
     # Disable sourceDestCheck on AWS
     # https://docs.projectcalico.org/reference/resources/felixconfig#aws-iam-rolepolicy-for-source-destination-check-configuration
