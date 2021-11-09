@@ -89,6 +89,7 @@ rules:
   - apiGroups: ["crd.projectcalico.org"]
     resources:
       - ippools
+      - ipreservations
     verbs:
       - list
   - apiGroups: ["crd.projectcalico.org"]
@@ -237,6 +238,7 @@ rules:
       - globalbgpconfigs
       - bgpconfigurations
       - ippools
+      - ipreservations
       - ipamblocks
       - globalnetworkpolicies
       - globalnetworksets
@@ -245,6 +247,7 @@ rules:
       - clusterinformations
       - hostendpoints
       - blockaffinities
+      - caliconodestatuses
     verbs:
       - get
       - list
@@ -257,6 +260,12 @@ rules:
       - clusterinformations
     verbs:
       - create
+      - update
+  # Calico must update some CRDs.
+  - apiGroups: [ "crd.projectcalico.org" ]
+    resources:
+      - caliconodestatuses
+    verbs:
       - update
   # Calico stores some configuration information on the node.
   - apiGroups: [""]
@@ -699,6 +708,12 @@ spec:
               memory: 140Mi
             limits:
               memory: 500Mi
+          lifecycle:
+            preStop:
+              exec:
+                command:
+                - /bin/calico-node
+                - -shutdown
           livenessProbe:
             exec:
               command:
