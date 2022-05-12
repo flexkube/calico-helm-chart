@@ -85,10 +85,9 @@ rules:
       - get
       - list
       - watch
-  # IPAM resources are manipulated when nodes are deleted.
+  # IPAM resources are manipulated in response to node and block updates, as well as periodic triggers.
   - apiGroups: ["crd.projectcalico.org"]
     resources:
-      - ippools
       - ipreservations
     verbs:
       - list
@@ -103,6 +102,13 @@ rules:
       - create
       - update
       - delete
+      - watch
+  # Pools are watched to maintain a mapping of blocks to IP pools.
+  - apiGroups: ["crd.projectcalico.org"]
+    resources:
+      - ippools
+    verbs:
+      - list
       - watch
   # kube-controllers manages hostendpoints.
   - apiGroups: ["crd.projectcalico.org"]
@@ -120,8 +126,10 @@ rules:
       - clusterinformations
     verbs:
       - get
+      - list
       - create
       - update
+      - watch
   # KubeControllersConfiguration is where it gets its config
   - apiGroups: ["crd.projectcalico.org"]
     resources:
@@ -467,7 +475,7 @@ spec:
 
 # This manifest creates a Pod Disruption Budget for Typha to allow K8s Cluster Autoscaler to evict
 
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: calico-typha
@@ -592,15 +600,6 @@ spec:
               name: cni-net-dir
           securityContext:
             privileged: true
-        # Adds a Flex Volume Driver that creates a per-pod Unix Domain Socket to allow Dikastes
-        # to communicate with Felix over the Policy Sync API.
-        - name: flexvol-driver
-          image: {{ .Values.node.image.registry }}/calico/pod2daemon-flexvol:v{{ .Chart.AppVersion }}
-          volumeMounts:
-          - name: flexvol-driver-host
-            mountPath: /host/driver
-          securityContext:
-            privileged: true
       containers:
         # Runs calico-node container on each Kubernetes node. This
         # container programs network policy and routes on each
@@ -648,6 +647,9 @@ spec:
             # Enable or Disable VXLAN on the default IP pool.
             - name: CALICO_IPV4POOL_VXLAN
               value: "Never"
+            # Enable or Disable VXLAN on the default IPv6 IP pool.
+            - name: CALICO_IPV6POOL_VXLAN
+              value: "Never"
             # Set MTU for tunnel device used if ipip is enabled
             - name: FELIX_IPINIPMTU
               valueFrom:
@@ -682,9 +684,6 @@ spec:
             # Disable IPv6 on Kubernetes.
             - name: FELIX_IPV6SUPPORT
               value: "false"
-            # Set Felix logging to "info"
-            - name: FELIX_LOGSEVERITYSCREEN
-              value: "info"
             - name: FELIX_HEALTHENABLED
               value: "true"
             - name: FELIX_PROMETHEUSMETRICSENABLED
@@ -802,11 +801,6 @@ spec:
           hostPath:
             type: DirectoryOrCreate
             path: /var/run/nodeagent
-        # Used to install Flex Volume Driver
-        - name: flexvol-driver-host
-          hostPath:
-            type: DirectoryOrCreate
-            path: {{ .Values.flexVolumePluginDir }}/nodeagent~uds
 ---
 
 apiVersion: v1
@@ -897,7 +891,7 @@ metadata:
 
 # This manifest creates a Pod Disruption Budget for Controller to allow K8s Cluster Autoscaler to evict
 
-apiVersion: policy/v1beta1
+apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: calico-kube-controllers
