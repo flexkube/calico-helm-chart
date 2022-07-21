@@ -82,3 +82,4 @@ spec:
   - pathPrefix: "{{ .Values.flexVolumePluginDir }}/nodeagent~uds"
   - pathPrefix: "/sys/fs"
   - pathPrefix: "/var/log/calico/cni"
+  - pathPrefix: "/proc"

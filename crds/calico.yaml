@@ -1,6 +1,5 @@
 ---
-# Source: calico/templates/kdd-crds.yaml
-
+# Source: crds/calico/crd.projectcalico.org_bgpconfigurations.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -179,8 +178,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_bgppeers.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -298,8 +297,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_blockaffinities.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -359,8 +358,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_caliconodestatuses.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -622,8 +621,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_clusterinformations.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -686,8 +685,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_felixconfigurations.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -1377,8 +1376,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_globalnetworkpolicies.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2232,8 +2231,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_globalnetworksets.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2285,8 +2284,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_hostendpoints.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2393,8 +2392,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_ipamblocks.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2512,8 +2511,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_ipamconfigs.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2568,8 +2567,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_ipamhandles.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2624,8 +2623,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_ippools.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2733,8 +2732,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_ipreservations.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -2787,8 +2786,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_kubecontrollersconfigurations.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -3040,8 +3039,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_networkpolicies.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -3876,8 +3875,8 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
-
 ---
+# Source: crds/calico/crd.projectcalico.org_networksets.yaml
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
@@ -3927,3 +3926,4 @@ status:
     plural: ""
   conditions: []
   storedVersions: []
+
