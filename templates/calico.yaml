@@ -58,10 +58,11 @@ data:
         }
       ]
     }
+# Source: calico/templates/kdd-crds.yaml
 ---
----
+{}
 # Source: calico/templates/calico-kube-controllers-rbac.yaml
-
+---
 # Include a clusterrole for the kube-controllers component,
 # and bind it to the calico-kube-controllers serviceaccount.
 kind: ClusterRole
@@ -161,11 +162,11 @@ roleRef:
   kind: ClusterRole
   name: calico-kube-controllers
 subjects:
-- kind: ServiceAccount
-  name: calico-kube-controllers
-  namespace: kube-system
+  - kind: ServiceAccount
+    name: calico-kube-controllers
+    namespace: kube-system
 ---
-
+{}
 ---
 # Source: calico/templates/calico-node-rbac.yaml
 # Include a clusterrole for the calico-node DaemonSet,
@@ -278,7 +279,7 @@ rules:
       - create
       - update
   # Calico must update some CRDs.
-  - apiGroups: [ "crd.projectcalico.org" ]
+  - apiGroups: ["crd.projectcalico.org"]
     resources:
       - caliconodestatuses
     verbs:
@@ -374,11 +375,8 @@ spec:
       name: calico-typha
   selector:
     k8s-app: calico-typha
-
 ---
-
 # This manifest creates a Deployment of Typha to back the above service.
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -480,9 +478,7 @@ spec:
           timeoutSeconds: 10
 
 ---
-
 # This manifest creates a Pod Disruption Budget for Typha to allow K8s Cluster Autoscaler to evict
-
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -546,10 +542,10 @@ spec:
           image: {{ .Values.node.image.registry }}/calico/cni:v{{ .Chart.AppVersion }}
           command: ["/opt/cni/bin/calico-ipam", "-upgrade"]
           envFrom:
-          - configMapRef:
-              # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
-              name: kubernetes-services-endpoint
-              optional: true
+            - configMapRef:
+                # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
+                name: kubernetes-services-endpoint
+                optional: true
           env:
             - name: KUBERNETES_NODE_NAME
               valueFrom:
@@ -573,10 +569,10 @@ spec:
           image: {{ .Values.node.image.registry }}/calico/cni:v{{ .Chart.AppVersion }}
           command: ["/opt/cni/bin/install"]
           envFrom:
-          - configMapRef:
-              # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
-              name: kubernetes-services-endpoint
-              optional: true
+            - configMapRef:
+                # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
+                name: kubernetes-services-endpoint
+                optional: true
           env:
             # Name of the CNI config file to create.
             - name: CNI_CONF_NAME
@@ -639,10 +635,10 @@ spec:
         - name: calico-node
           image: {{ .Values.node.image.registry }}/calico/node:v{{ .Chart.AppVersion }}
           envFrom:
-          - configMapRef:
-              # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
-              name: kubernetes-services-endpoint
-              optional: true
+            - configMapRef:
+                # Allow KUBERNETES_SERVICE_HOST and KUBERNETES_SERVICE_PORT to be overridden for eBPF mode.
+                name: kubernetes-services-endpoint
+                optional: true
           env:
             # Use Kubernetes API as the backing datastore.
             - name: DATASTORE_TYPE
@@ -743,14 +739,14 @@ spec:
             preStop:
               exec:
                 command:
-                - /bin/calico-node
-                - -shutdown
+                  - /bin/calico-node
+                  - -shutdown
           livenessProbe:
             exec:
               command:
-              - /bin/calico-node
-              - -felix-live
-              - -bird-live
+                - /bin/calico-node
+                - -felix-live
+                - -bird-live
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6
@@ -758,9 +754,9 @@ spec:
           readinessProbe:
             exec:
               command:
-              - /bin/calico-node
-              - -felix-ready
-              - -bird-ready
+                - /bin/calico-node
+                - -felix-ready
+                - -bird-ready
             periodSeconds: 10
             timeoutSeconds: 10
           volumeMounts:
@@ -839,13 +835,11 @@ spec:
             type: DirectoryOrCreate
             path: /var/run/nodeagent
 ---
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: calico-node
   namespace: kube-system
-
 ---
 # Source: calico/templates/calico-kube-controllers.yaml
 # See https://github.com/projectcalico/kube-controllers
@@ -897,8 +891,8 @@ spec:
           livenessProbe:
             exec:
               command:
-              - /usr/bin/check-status
-              - -l
+                - /usr/bin/check-status
+                - -l
             periodSeconds: 10
             initialDelaySeconds: 10
             failureThreshold: 6
@@ -906,8 +900,8 @@ spec:
           readinessProbe:
             exec:
               command:
-              - /usr/bin/check-status
-              - -r
+                - /usr/bin/check-status
+                - -r
             periodSeconds: 10
           resources:
             requests:
@@ -917,17 +911,13 @@ spec:
               memory: 50Mi
 
 ---
-
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: calico-kube-controllers
   namespace: kube-system
-
 ---
-
 # This manifest creates a Pod Disruption Budget for Controller to allow K8s Cluster Autoscaler to evict
-
 apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
@@ -940,11 +930,9 @@ spec:
   selector:
     matchLabels:
       k8s-app: calico-kube-controllers
-
----
 # Source: calico/templates/calico-etcd-secrets.yaml
-
 ---
+{}
 # Source: calico/templates/configure-canal.yaml
-
-
+---
+{}
