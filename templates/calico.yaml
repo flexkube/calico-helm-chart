@@ -5,7 +5,6 @@ apiVersion: policy/v1
 kind: PodDisruptionBudget
 metadata:
   name: calico-kube-controllers
-  namespace: kube-system
   labels:
     k8s-app: calico-kube-controllers
 spec:
@@ -170,14 +169,6 @@ rules:
       - update
       # watch for changes
       - watch
-  # Allow using PSP
-  - apiGroups: ["policy"]
-    resources:
-      - podsecuritypolicies
-    verbs:
-      - use
-    resourceNames:
-      - calico-kube-controllers
 ---
 # Source: calico/templates/calico-node-rbac.yaml
 # Include a clusterrole for the calico-node DaemonSet,
@@ -345,15 +336,6 @@ rules:
       - daemonsets
     verbs:
       - get
-  # Allow using PSP
-  - apiGroups: ["policy"]
-    resources:
-      - podsecuritypolicies
-    verbs:
-      - use
-    resourceNames:
-      - calico-node
-
 ---
 # Source: calico/templates/calico-kube-controllers-rbac.yaml
 kind: ClusterRoleBinding
